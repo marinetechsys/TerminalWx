@@ -1,0 +1,28 @@
+{
+  "name": "TerminalWx",
+  "version": "1.0.0",
+  "description": "This is a wxWidgets Terminal widget",
+  "keywords": "wxWidgets,Terminal",
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/marinetechsys/TerminalWx"
+  },
+  "authors":
+  [
+    {
+      "name": "Adam Phoenix",
+      "email": "aphoenix@blueoceanmts.com",
+      "url": "https://github.com/marinetechsys"
+    }
+  ],
+  "homepage": "https://www.blueoceanmts.com/",
+  "dependencies": {
+    "WxLibs-platformio": "https://github.com/marinetechsys/WxLibs-platformio.git"
+  },
+  "frameworks": "*",
+  "platforms": "*",
+  "include": [
+    "src"
+  ]
+}

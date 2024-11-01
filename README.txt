@@ -1,8 +1,6 @@
 This is a wxWidgets Terminal widget conveniently packaged for you.
 
-For doxygen documentation, see: http://jeremysalwen.github.com/TerminalWx/
-
-TerminalWx is taken (with modifications) from the Chameleon IDE (Mark 
+TerminalWx is taken (with modifications) from the Chameleon IDE (Mark
 Erikson), which itself took (with modifications) from taTelnet (Derry 
 Bryson), which itself took (with modifications) from GTerm (Timothy 
 Miller).  So this code has a bit of history ;).  All credit to those 
@@ -17,5 +15,5 @@ Dependencies
 -----
 
 You will need wxgtk version 2.9 or later.
-You will also need libwxsmith to compile the test application.
+
 
