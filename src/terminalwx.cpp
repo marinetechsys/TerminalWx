@@ -49,7 +49,8 @@ void TerminalWx::SendBack(char* data) {
  *
 */
 void TerminalWx::DisplayChars(const wxString& str) {
-     this->QueueEvent(new TerminalInputEvent(str));
+    ProcessInput(str.length(),(unsigned char*)const_cast<char*>((const char*)str.mb_str()));
+    //this->QueueEvent(new TerminalInputEvent(str));
 }
 
 /**

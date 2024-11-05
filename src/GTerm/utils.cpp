@@ -52,10 +52,12 @@ void GTerm::update_changes()
 	    if (text[yp+x]!=32 && text[yp+x]) blank = 0;
 	    if (c != color[yp+x]) {
 		if (!blank) {
+#ifdef GTERM_PC
                   if(mode_flags & PC)
 		    DrawText((c>>4)&0xf, (c>>8)&0xf, c/*&15*/, start_x,
 			y, x-start_x, text+yp+start_x);
                   else
+#endif
 		    DrawText((c>>4)&7, (c>>8)&7, c/*&15*/, start_x,
 			y, x-start_x, text+yp+start_x);
 		} else {
@@ -68,10 +70,12 @@ void GTerm::update_changes()
 	    }
 	}
 		if (!blank) {
+#ifdef GTERM_PC
                   if(mode_flags & PC)
 		    DrawText((c>>4)&0xf, (c>>8)&0xf, c/*&15*/, start_x,
 			y, x-start_x, text+yp+start_x);
                   else
+#endif
 		    DrawText((c>>4)&7, (c>>8)&7, c/*&15*/, start_x,
 			y, x-start_x, text+yp+start_x);
 		} else {
@@ -87,9 +91,11 @@ void GTerm::update_changes()
 	if (x>=width) x = width-1;
         yp = linenumbers[cursor_y]*MAXWIDTH+x;
         c = color[yp];
+#ifdef GTERM_PC
         if(mode_flags & PC)
           DrawCursor((c>>4)&0xf, (c>>8)&0xf, c&15, x, cursor_y, text[yp]);
         else
+#endif
           DrawCursor((c>>4)&7, (c>>8)&7, c&15, x, cursor_y, text[yp]);
     }
 
