@@ -48,6 +48,10 @@ void GTerm::ProcessInput(int len, unsigned char *data)
 
 void GTerm::Reset() { reset(); }
 
+void GTerm::ExposeAll()
+{
+    ExposeArea(0, 0, width, height);
+}
 void GTerm::ExposeArea(int x, int y, int w, int h)
 {
     int i;
@@ -141,11 +145,21 @@ void GTerm::Select(int x, int y, int select)
     if (color && x >= 0 && x < Width() && y >= 0 && y < Height())
     {
         if (select)
-            color[(linenumbers[y] * MAXWIDTH) + x] |= SELECTED;
+        {
+            //if (0 == (color[(linenumbers[y] * MAXWIDTH) + x] & SELECTED))
+            {
+                color[(linenumbers[y] * MAXWIDTH) + x] |= SELECTED;
+                changed_line(y, x, x);
+            }
+        }
         else
-            color[(linenumbers[y] * MAXWIDTH) + x] &= ~SELECTED;
-        changed_line(y, x, x);
-        //    update_changes();
+        {
+            //if (0 != (color[(linenumbers[y] * MAXWIDTH) + x] & SELECTED))
+            {
+                color[(linenumbers[y] * MAXWIDTH) + x] &= ~SELECTED;
+                changed_line(y, x, x);
+            }
+        }
     }
 }
 

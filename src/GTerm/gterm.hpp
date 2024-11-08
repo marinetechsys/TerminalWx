@@ -19,6 +19,7 @@ License: wxWindows License Version 3.1 (See the file license3.txt)
 #include <stdlib.h>
 #include <string.h>
 
+
 #define MAXWIDTH 400
 #define MAXHEIGHT 600
 
@@ -227,8 +228,10 @@ private:
 
 #endif // GTERM_PC
 
+public:
     // utility functions
     void update_changes();
+    bool changes_pending();
     void scroll_region(int start_y, int end_y, int num); // does clear
     void shift_text(int y, int start_x, int end_x, int num); // ditto
     void clear_area(int start_x, int start_y, int end_x, int end_y);
@@ -236,6 +239,7 @@ private:
     void move_cursor(int x, int y);
     int calc_color(int fg, int bg, int flags);
 
+private:
     // action parameters
     int nparam, param[30];
     unsigned char *input_data;
@@ -300,6 +304,7 @@ public:
     virtual void ResizeTerminal(int width, int height);
     int Width() { return width; }
     int Height() { return height; }
+    virtual void ExposeAll();
     virtual void ExposeArea(int x, int y, int w, int h);
     virtual void Reset();
     virtual void Dirty() {};

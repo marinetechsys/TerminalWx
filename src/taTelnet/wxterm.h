@@ -34,7 +34,7 @@ License: wxWindows License Version 3.1 (See the file license3.txt)
     {wxEVT_COMMAND_TERM_RESIZE, id, -1,                                                            \
      (wxObjectEventFunction)(wxEventFunction)(wxCommandEventFunction) & fn, (wxObject *)NULL},
 
-class wxTerm : public wxWindow, public GTerm //wxScrolled<wxWindow>
+class wxTerm : public wxScrolled<wxWindow>, public GTerm //wxScrolled<wxWindow>
 {
     int m_charWidth, m_charHeight, m_init, m_width, m_height, m_selx1, m_sely1, m_selx2, m_sely2,
         m_curX, m_curY, m_curFG, m_curBG, m_curFlags, m_curState, m_curBlinkRate;
@@ -157,6 +157,8 @@ public:
     virtual void OnChar(wxKeyEvent &event);
     virtual void OnKeyDown(wxKeyEvent &event);
     virtual void OnPaint(wxPaintEvent &event);
+    virtual void OnClearBg(wxEraseEvent &event);
+    virtual void OnScroll(wxScrollWinEvent &event);
     virtual void OnLeftDown(wxMouseEvent &event);
     virtual void OnLeftUp(wxMouseEvent &event);
     virtual void OnRightDown(wxMouseEvent &event);

@@ -23,6 +23,7 @@ License: wxWindows License Version 3.1 (See the file license3.txt)
 #include <wx/brush.h>
 #include <wx/clipbrd.h>
 #include <wx/cursor.h>
+#include <wx/dcbuffer.h>
 #include <wx/dcclient.h>
 #include <wx/event.h>
 #include <wx/log.h>
@@ -31,7 +32,6 @@ License: wxWindows License Version 3.1 (See the file license3.txt)
 #include <wx/settings.h>
 #include <wx/timer.h>
 #include <wx/utils.h>
-#include <wx/dcbuffer.h>
 
 #include <algorithm>
 #include <ctype.h>
@@ -356,6 +356,7 @@ static unsigned char xCharMap[] = {
 
 BEGIN_EVENT_TABLE(wxTerm, wxWindow)
 EVT_PAINT(wxTerm::OnPaint)
+EVT_ERASE_BACKGROUND(wxTerm::OnClearBg)
 EVT_CHAR(wxTerm::OnChar)
 EVT_LEFT_DOWN(wxTerm::OnLeftDown)
 EVT_LEFT_UP(wxTerm::OnLeftUp)
@@ -365,6 +366,10 @@ EVT_TIMER(-1, wxTerm::OnTimer)
   EVT_KEY_DOWN(wxTerm::OnKeyDown)
 #endif
 
+EVT_SCROLLWIN_THUMBTRACK(wxTerm::OnScroll)
+EVT_SCROLLWIN_THUMBRELEASE(wxTerm::OnScroll)
+EVT_SCROLLWIN_LINEUP(wxTerm::OnScroll)
+EVT_SCROLLWIN_LINEDOWN(wxTerm::OnScroll)
 EVT_SIZE(wxTerm::OnSize)
 EVT_SET_FOCUS(wxTerm::OnGainFocus)
 EVT_KILL_FOCUS(wxTerm::OnLoseFocus)
@@ -375,8 +380,8 @@ END_EVENT_TABLE()
 
 wxTerm::wxTerm(wxWindow *parent, wxWindowID id, const wxPoint &pos, int width, int height,
                const wxString &name) :
-    //wxScrolled<wxWindow>
-    wxWindow(parent, id, pos, wxSize(-1, -1), wxWANTS_CHARS, name), GTerm(width, height)
+    // wxScrolled<wxWindow>
+    wxScrolled<wxWindow>(parent, id, pos, wxSize(-1, -1), wxWANTS_CHARS, name), GTerm(width, height)
 {
     int i;
 
@@ -434,9 +439,9 @@ wxTerm::wxTerm(wxWindow *parent, wxWindowID id, const wxPoint &pos, int width, i
     SetCursor(wxCursor(wxCURSOR_IBEAM));
 
     UpdateSize();
-    ResizeTerminal(m_width, m_height);
-    //SetVirtualSize(m_width * m_charWidth, m_height * m_charHeight);
-    //SetScrollRate(m_charWidth, m_charHeight);
+    // ResizeTerminal(m_width, m_height);
+    SetVirtualSize(m_width * m_charWidth, m_height * m_charHeight);
+    SetScrollRate(m_charWidth, m_charHeight);
 
     m_init = 0;
 }
@@ -887,20 +892,31 @@ void wxTerm::OnKeyDown(wxKeyEvent &event)
 void wxTerm::OnPaint(wxPaintEvent &WXUNUSED(event))
 {
     // depending on your system you may need to look at double-buffered dcs
-    //wxBufferedPaintDC || wxAutoBufferedPaintDC
+    // wxPaintDC || wxBufferedPaintDC || wxAutoBufferedPaintDC
     wxPaintDC dc(this);
-    //DoPrepareDC(*dc);
+    DoPrepareDC(dc);
     m_curDC = &dc;
 
-    ExposeArea(0, 0, m_width, m_height);
+    int vX, vY, vW, vH;
+    wxRegionIterator upd(GetUpdateRegion()); // get the update rect list
+    while (upd)
+    {
+        vX = upd.GetX();
+        vY = upd.GetY();
+        vW = upd.GetW();
+        vH = upd.GetH();
+
+        // Repaint this rectangle
+        ExposeArea(vX / m_charWidth, vY / m_charHeight, vW / m_charWidth, vH / m_charHeight);
+
+        upd++;
+    }
 
     GTerm::UpdateChanges();
 
     wxLongLong ms = wxGetUTCTimeMillis();
 
-    if ((m_curX >= 0 && m_curY >= 0) &&
-        (!(GetMode() & CURSORINVISIBLE)) &&
-        ((GetMode() & BLINK)) &&
+    if ((m_curX >= 0 && m_curY >= 0) && (!(GetMode() & CURSORINVISIBLE)) && ((GetMode() & BLINK)) &&
         (ms - m_blinkTimer >= m_curBlinkRate))
     {
         m_blinkTimer = ms;
@@ -916,6 +932,21 @@ void wxTerm::OnPaint(wxPaintEvent &WXUNUSED(event))
     }
 
     m_curDC = nullptr;
+}
+
+void wxTerm::OnClearBg(wxEraseEvent &WXUNUSED(event))
+{
+    // Deliberately ignore bg clear events.
+}
+
+void wxTerm::OnScroll(wxScrollWinEvent &event)
+{
+    CallAfter([=]()
+    {
+        ExposeArea(0, 0, m_width, m_height);
+        Dirty();
+    });
+    event.Skip(); // let the event go
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1064,10 +1095,10 @@ void wxTerm::OnMouseMove(wxMouseEvent &event)
             m_sely2 = Height() - 1;
         */
         m_selx2 = event.GetX() / m_charWidth;
-        if(m_selx2 >= Width())
+        if (m_selx2 >= Width())
             m_selx2 = Width() - 1;
         m_sely2 = event.GetY() / m_charHeight;
-        if(m_sely2 >= Height())
+        if (m_sely2 >= Height())
             m_sely2 = Height() - 1;
 
         MarkSelection();
@@ -1420,15 +1451,14 @@ void wxTerm::DrawCursor(int fg_color, int bg_color, int flags, int x, int y, uns
     m_curBG = bg_color, m_curFlags = flags;
     m_curChar = c;
 
-
-    if (m_timer.IsRunning())
-        m_timer.Stop();
+    // if (m_timer.IsRunning())
+    //     m_timer.Stop();
     DoDrawCursor(fg_color, bg_color, flags, x, y, c);
-    if (m_curBlinkRate)
-    {
-        m_timer.Start(TIMER_TIMEOUT);
-        m_curState = 1;
-    }
+    //    if (m_curBlinkRate)
+    //    {
+    //        m_timer.Start(TIMER_TIMEOUT);
+    //        m_curState = 1;
+    //    }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1446,12 +1476,13 @@ void wxTerm::OnTimer(wxTimerEvent &WXUNUSED(event))
     if (m_init)
         return;
 
-    //Dirty();
+    if (changes_pending())
+        Dirty();
 }
 
 void wxTerm::Dirty()
 {
-    Refresh();
+    CallAfter([=]() { Refresh(); });
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1506,17 +1537,17 @@ void wxTerm::MoveChars(int sx, int sy, int dx, int dy, int w, int h)
 //////////////////////////////////////////////////////////////////////////////
 void wxTerm::ClearChars(int clear_bg_color, int x, int y, int w, int h)
 {
-    /*
-    int xpix = x * m_charWidth;
-    int ypix = y * m_charHeight;
-    int wpix = w * m_charWidth;
-    int hpix = h * m_charHeight;
+    if (m_curDC)
+    {
+        int xpix = x * m_charWidth;
+        int ypix = y * m_charHeight;
+        int wpix = w * m_charWidth;
+        int hpix = h * m_charHeight;
 
-    m_curDC->SetPen(m_colorPens[clear_bg_color]);
-    m_curDC->SetBrush(wxBrush(m_colors[clear_bg_color], wxSOLID));
-    m_curDC->DrawRectangle(xpix, ypix, wpix, hpix);
-    */
-    Dirty();
+        m_curDC->SetPen(m_colorPens[clear_bg_color]);
+        m_curDC->SetBrush(wxBrush(m_colors[clear_bg_color], wxSOLID));
+        m_curDC->DrawRectangle(xpix, ypix, wpix, hpix);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1579,7 +1610,7 @@ void wxTerm::UpdateSize()
     dc.SetFont(m_normalFont);
     dc.GetTextExtent("M", &charWidth, &charHeight);
 
-    wxSize currentClientSize = GetClientSize();//GetVirtualSize();
+    wxSize currentClientSize = GetVirtualSize(); // GetClientSize();//
     int numCharsInLine = currentClientSize.GetX() / charWidth;
     int numLinesShown = currentClientSize.GetY() / charHeight;
 
@@ -1609,7 +1640,11 @@ void wxTerm::UpdateSize()
 
     m_inUpdateSize = false;
 
-    Dirty();
+    CallAfter([=]()
+    {
+        ExposeArea(0, 0, m_width, m_height);
+        Dirty();
+    });
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1661,10 +1696,10 @@ void wxTerm::ResizeTerminal(int width, int height)
     **  Set window size
     */
 #if defined(__WXGTK__) || defined(__WXMOTIF__)
-    //SetVirtualSize(w, h + 4);
+    // SetVirtualSize(w, h + 4);
     SetSize(w, h + 4);
 #else
-    //SetVirtualSize(w, h);
+    // SetVirtualSize(w, h);
     SetSize(w, h);
 #endif
 
@@ -1675,6 +1710,7 @@ void wxTerm::ResizeTerminal(int width, int height)
     m_width = set_width;
     m_height = set_height;
 
+    ExposeAll();
     /*
     **  Send event
     */
@@ -1712,7 +1748,7 @@ void wxTerm::RequestSizeChange(int w, int h) { ResizeTerminal(w, h); }
 //////////////////////////////////////////////////////////////////////////////
 void wxTerm::ProcessInput(int len, unsigned char *data)
 {
-    ClearSelection();
+    // ClearSelection();
 
     GTerm::ProcessInput(len, data);
 
