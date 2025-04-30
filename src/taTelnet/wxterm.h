@@ -34,7 +34,7 @@ License: wxWindows License Version 3.1 (See the file license3.txt)
     {wxEVT_COMMAND_TERM_RESIZE, id, -1,                                                            \
      (wxObjectEventFunction)(wxEventFunction)(wxCommandEventFunction) & fn, (wxObject *)NULL},
 
-class wxTerm : public wxScrolled<wxWindow>, public GTerm //wxScrolled<wxWindow>
+class wxTerm : public wxScrolledWindow, public GTerm //wxScrolled<wxWindow>
 {
     int m_charWidth, m_charHeight, m_init, m_width, m_height, m_selx1, m_sely1, m_selx2, m_sely2,
         m_curX, m_curY, m_curFG, m_curBG, m_curFlags, m_curState, m_curBlinkRate;
@@ -44,7 +44,7 @@ class wxTerm : public wxScrolled<wxWindow>, public GTerm //wxScrolled<wxWindow>
 
     unsigned char m_curChar;
 
-    bool m_selecting, m_marking;
+    bool m_selecting, m_marking, m_autoscroll;
 
     bool m_inUpdateSize;
 
@@ -89,6 +89,7 @@ private:
     } TermKeyMap;
 
     static TermKeyMap keyMapTable[];
+    static unsigned char xCharMap[];
 
 public:
     wxTerm(wxWindow *parent, wxWindowID id, const wxPoint &pos = wxDefaultPosition, int width = 80,
@@ -118,6 +119,7 @@ public:
     void SelectAll();
 
     void UpdateSize();
+    void ScrollToBottom();
     // void UpdateSize(int &termheight, int &linesReceived);
     // void UpdateSize(wxSizeEvent &event);
 

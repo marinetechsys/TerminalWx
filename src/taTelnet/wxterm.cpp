@@ -39,6 +39,9 @@ License: wxWindows License Version 3.1 (See the file license3.txt)
 #include "../GTerm/gterm.hpp"
 #include "wxterm.h"
 
+#include <iostream>
+#include <ostream>
+
 
 #define TIMER_TIMEOUT 100
 #define CURSOR_BLINK_DEFAULT_TIMEOUT 500
@@ -46,326 +49,17 @@ License: wxWindows License Version 3.1 (See the file license3.txt)
 #define ID_MENU_COPY 1000
 #define ID_MENU_PASTE 1001
 
-/*
-**  Keycode translation tables
-*/
-wxTerm::TermKeyMap wxTerm::keyMapTable[] = {{WXK_BACK, GTerm::KEY_BACK},
-                                            {WXK_TAB, GTerm::KEY_TAB},
-                                            {WXK_RETURN, GTerm::KEY_RETURN},
-                                            {WXK_ESCAPE, GTerm::KEY_ESCAPE},
-                                            {WXK_SPACE, GTerm::KEY_SPACE},
-                                            {WXK_LEFT, GTerm::KEY_LEFT},
-                                            {WXK_UP, GTerm::KEY_UP},
-                                            {WXK_RIGHT, GTerm::KEY_RIGHT},
-                                            {WXK_DOWN, GTerm::KEY_DOWN},
-                                            //  { WXK_DIVIDE, GTerm::KEY_DIVIDE },
-                                            //  { WXK_MULTIPLY, GTerm::KEY_MULTIPLY },
-                                            //  { WXK_SUBTRACT, GTerm::KEY_SUBTRACT },
-                                            //  { WXK_ADD, GTerm::KEY_ADD },
-                                            {WXK_HOME, GTerm::KEY_HOME},
-                                            {WXK_END, GTerm::KEY_END},
-                                            {WXK_PAGEUP, GTerm::KEY_PAGEUP},
-                                            {WXK_PAGEDOWN, GTerm::KEY_PAGEDOWN},
-                                            {WXK_INSERT, GTerm::KEY_INSERT},
-                                            {WXK_DELETE, GTerm::KEY_DELETE},
-                                            //  { WXK_NEXT, GTerm::KEY_NEXT },
-                                            //  { WXK_PRIOR, GTerm::KEY_PRIOR },
-                                            //  { WXK_NUMPAD0, GTerm::KEY_NUMPAD0 },
-                                            //  { WXK_NUMPAD1, GTerm::KEY_NUMPAD1 },
-                                            //  { WXK_NUMPAD2, GTerm::KEY_NUMPAD2 },
-                                            //  { WXK_NUMPAD3, GTerm::KEY_NUMPAD3 },
-                                            //  { WXK_NUMPAD4, GTerm::KEY_NUMPAD4 },
-                                            //  { WXK_NUMPAD5, GTerm::KEY_NUMPAD5 },
-                                            //  { WXK_NUMPAD6, GTerm::KEY_NUMPAD6 },
-                                            //  { WXK_NUMPAD7, GTerm::KEY_NUMPAD7 },
-                                            //  { WXK_NUMPAD8, GTerm::KEY_NUMPAD8 },
-                                            //  { WXK_NUMPAD9, GTerm::KEY_NUMPAD9 },
-                                            //  { WXK_DECIMAL, GTerm::KEY_NUMPAD_DECIMAL },
-                                            {WXK_F1, GTerm::KEY_F1},
-                                            {WXK_F2, GTerm::KEY_F2},
-                                            {WXK_F3, GTerm::KEY_F3},
-                                            {WXK_F4, GTerm::KEY_F4},
-                                            {WXK_F5, GTerm::KEY_F5},
-                                            {WXK_F6, GTerm::KEY_F6},
-                                            {WXK_F7, GTerm::KEY_F7},
-                                            {WXK_F8, GTerm::KEY_F8},
-                                            {WXK_F9, GTerm::KEY_F9},
-                                            {WXK_F10, GTerm::KEY_F10},
-                                            {WXK_F11, GTerm::KEY_F11},
-                                            {WXK_F12, GTerm::KEY_F12},
-                                            {(wxKeyCode)0, GTerm::KEY_NULL}};
 
-static unsigned char xCharMap[] = {
-    0, // 0
-    1, // 1
-    2, // 2
-    3, // 3
-    1, // 4
-    5, // 5
-    6, // 6
-    7, // 7
-    8, // 8
-    9, // 9
-    10, // 10
-    11, // 11
-    12, // 12
-    13, // 13
-    14, // 14
-    15, // 15
-    62, // 16
-    60, // 17
-    18, // 18
-    19, // 19
-    20, // 20
-    21, // 21
-    22, // 22
-    23, // 23
-    24, // 24
-    25, // 25
-    26, // 26
-    27, // 27
-    28, // 28
-    29, // 29
-    94, // 30
-    31, // 31
-    32, // 32
-    33, // 33
-    34, // 34
-    35, // 35
-    36, // 36
-    37, // 37
-    38, // 38
-    39, // 39
-    40, // 40
-    41, // 41
-    42, // 42
-    43, // 43
-    44, // 44
-    45, // 45
-    46, // 46
-    47, // 47
-    48, // 48
-    49, // 49
-    50, // 50
-    51, // 51
-    52, // 52
-    53, // 53
-    54, // 54
-    55, // 55
-    56, // 56
-    57, // 57
-    58, // 58
-    59, // 59
-    60, // 60
-    61, // 61
-    62, // 62
-    63, // 63
-    64, // 64
-    65, // 65
-    66, // 66
-    67, // 67
-    68, // 68
-    69, // 69
-    70, // 70
-    71, // 71
-    72, // 72
-    73, // 73
-    74, // 74
-    75, // 75
-    76, // 76
-    77, // 77
-    78, // 78
-    79, // 79
-    80, // 80
-    81, // 81
-    82, // 82
-    83, // 83
-    84, // 84
-    85, // 85
-    86, // 86
-    87, // 87
-    88, // 88
-    89, // 89
-    90, // 90
-    91, // 91
-    92, // 92
-    93, // 93
-    94, // 94
-    95, // 95
-    96, // 96
-    97, // 97
-    98, // 98
-    99, // 99
-    100, // 100
-    101, // 101
-    102, // 102
-    103, // 103
-    104, // 104
-    105, // 105
-    106, // 106
-    107, // 107
-    108, // 108
-    109, // 109
-    110, // 110
-    111, // 111
-    112, // 112
-    113, // 113
-    114, // 114
-    115, // 115
-    116, // 116
-    117, // 117
-    118, // 118
-    119, // 119
-    120, // 120
-    121, // 121
-    122, // 122
-    123, // 123
-    124, // 124
-    125, // 125
-    126, // 126
-    127, // 127
-    128, // 128
-    129, // 129
-    130, // 130
-    131, // 131
-    132, // 132
-    133, // 133
-    134, // 134
-    135, // 135
-    136, // 136
-    137, // 137
-    138, // 138
-    139, // 139
-    140, // 140
-    141, // 141
-    142, // 142
-    143, // 143
-    144, // 144
-    145, // 145
-    146, // 146
-    147, // 147
-    148, // 148
-    149, // 149
-    150, // 150
-    151, // 151
-    152, // 152
-    153, // 153
-    154, // 154
-    155, // 155
-    156, // 156
-    157, // 157
-    158, // 158
-    159, // 159
-    160, // 160
-    161, // 161
-    162, // 162
-    163, // 163
-    164, // 164
-    165, // 165
-    166, // 166
-    167, // 167
-    168, // 168
-    169, // 169
-    170, // 170
-    171, // 171
-    172, // 172
-    173, // 173
-    174, // 174
-    175, // 175
-    2, // 176
-    2, // 177
-    2, // 178
-    25, // 179
-    22, // 180
-    22, // 181
-    22, // 182
-    12, // 183
-    12, // 184
-    22, // 185
-    25, // 186
-    12, // 187
-    11, // 188
-    11, // 189
-    11, // 190
-    12, // 191
-    14, // 192
-    23, // 193
-    24, // 194
-    21, // 195
-    18, // 196
-    15, // 197
-    21, // 198
-    21, // 199
-    14, // 200
-    13, // 201
-    23, // 202
-    24, // 203
-    21, // 204
-    18, // 205
-    15, // 206
-    23, // 207
-    23, // 208
-    24, // 209
-    24, // 210
-    14, // 211
-    14, // 212
-    13, // 213
-    13, // 214
-    15, // 215
-    15, // 216
-    11, // 217
-    13, // 218
-    0, // 219
-    220, // 220
-    221, // 221
-    222, // 222
-    223, // 223
-    224, // 224
-    225, // 225
-    226, // 226
-    227, // 227
-    228, // 228
-    229, // 229
-    230, // 230
-    231, // 231
-    232, // 232
-    233, // 233
-    234, // 234
-    235, // 235
-    236, // 236
-    237, // 237
-    238, // 238
-    239, // 239
-    240, // 240
-    241, // 241
-    242, // 242
-    243, // 243
-    244, // 244
-    245, // 245
-    246, // 246
-    247, // 247
-    248, // 248
-    249, // 249
-    250, // 250
-    251, // 251
-    252, // 252
-    253, // 253
-    254, // 254
-    255 // 255
-};
-
-BEGIN_EVENT_TABLE(wxTerm, wxWindow)
+BEGIN_EVENT_TABLE(wxTerm, wxScrolledWindow)
 EVT_PAINT(wxTerm::OnPaint)
 EVT_ERASE_BACKGROUND(wxTerm::OnClearBg)
 EVT_CHAR(wxTerm::OnChar)
+//EVT_CHAR_HOOK(wxTerm::OnChar)
+//  EVT_KEY_DOWN(wxTerm::OnKeyDown)
 EVT_LEFT_DOWN(wxTerm::OnLeftDown)
 EVT_LEFT_UP(wxTerm::OnLeftUp)
 EVT_MOTION(wxTerm::OnMouseMove)
 EVT_TIMER(-1, wxTerm::OnTimer)
-#if 0
-  EVT_KEY_DOWN(wxTerm::OnKeyDown)
-#endif
-
 EVT_SCROLLWIN_THUMBTRACK(wxTerm::OnScroll)
 EVT_SCROLLWIN_THUMBRELEASE(wxTerm::OnScroll)
 EVT_SCROLLWIN_LINEUP(wxTerm::OnScroll)
@@ -381,7 +75,7 @@ END_EVENT_TABLE()
 wxTerm::wxTerm(wxWindow *parent, wxWindowID id, const wxPoint &pos, int width, int height,
                const wxString &name) :
     // wxScrolled<wxWindow>
-    wxScrolled<wxWindow>(parent, id, pos, wxSize(-1, -1), wxWANTS_CHARS, name), GTerm(width, height)
+    wxScrolledWindow(parent, id, pos, wxSize(-1, -1), wxWANTS_CHARS, name), GTerm(width, height)
 {
     int i;
 
@@ -398,8 +92,9 @@ wxTerm::wxTerm(wxWindow *parent, wxWindowID id, const wxPoint &pos, int width, i
     m_selecting = FALSE;
     m_selx1 = m_sely1 = m_selx2 = m_sely2 = 0;
     m_marking = FALSE;
-    m_curX = -1;
-    m_curY = -1;
+    m_autoscroll = TRUE;
+    m_curX = 0;
+    m_curY = 0;
     m_curBlinkRate = CURSOR_BLINK_DEFAULT_TIMEOUT;
     m_timer.SetOwner(this);
     m_timer.Start(TIMER_TIMEOUT);
@@ -442,6 +137,8 @@ wxTerm::wxTerm(wxWindow *parent, wxWindowID id, const wxPoint &pos, int width, i
     // ResizeTerminal(m_width, m_height);
     SetVirtualSize(m_width * m_charWidth, m_height * m_charHeight);
     SetScrollRate(m_charWidth, m_charHeight);
+
+    //Bind(wxEVT_CHAR_HOOK, &wxTerm::OnChar, this);
 
     m_init = 0;
 }
@@ -867,16 +564,17 @@ void wxTerm::OnChar(wxKeyEvent &event)
 //////////////////////////////////////////////////////////////////////////////
 void wxTerm::OnKeyDown(wxKeyEvent &event)
 {
-    if (!(GetMode() & PC) && event.AltDown())
-        event.Skip();
-    else if (event.AltDown())
-    {
-        //    wxLogMessage("OnKeyDown() got KeyCode = %d", event.KeyCode());
-        //    if(event.KeyCode() != 309)
-        //      OnChar(event);
-    }
-    else
-        event.Skip();
+    event.Skip();
+    // if (!(GetMode() & PC) && event.AltDown())
+    //     event.Skip();
+    // else if (event.AltDown())
+    // {
+    //     //    wxLogMessage("OnKeyDown() got KeyCode = %d", event.KeyCode());
+    //     //    if(event.KeyCode() != 309)
+    //     //      OnChar(event);
+    // }
+    // else
+    //     event.Skip();
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -893,7 +591,7 @@ void wxTerm::OnPaint(wxPaintEvent &WXUNUSED(event))
 {
     // depending on your system you may need to look at double-buffered dcs
     // wxPaintDC || wxBufferedPaintDC || wxAutoBufferedPaintDC
-    wxPaintDC dc(this);
+    wxBufferedPaintDC dc(this);
     DoPrepareDC(dc);
     m_curDC = &dc;
 
@@ -941,6 +639,18 @@ void wxTerm::OnClearBg(wxEraseEvent &WXUNUSED(event))
 
 void wxTerm::OnScroll(wxScrollWinEvent &event)
 {
+    int yppu, cx, cy, sy;
+
+    GetScrollPixelsPerUnit(nullptr, &yppu);
+    GetClientSize( &cx, &cy);
+
+    int pos = GetScrollPos(wxVERTICAL);
+    int cursor = GetCursorY();
+
+    sy = cursor - cy/m_charHeight;
+
+    m_autoscroll = (sy < pos);
+
     CallAfter([=]()
     {
         ExposeArea(0, 0, m_width, m_height);
@@ -1263,6 +973,29 @@ void wxTerm::SelectAll()
     MarkSelection();
 }
 
+void wxTerm::ScrollToBottom()
+{
+    int yppu, ycur, cx, cy, vx, vy;
+
+    GetScrollPixelsPerUnit(nullptr, &yppu);
+    GetClientSize( &cx, &cy);
+    GetViewStart(&vx, &vy);
+    ycur = m_curY * m_charHeight;
+
+    int view_start_px = vy * yppu;
+    int view_end_px = view_start_px + cy;
+    if (ycur > view_end_px)
+    {
+        int scroll_pos = std::min((ycur+m_charHeight-cy)/yppu+1, GetScrollLines(wxVERTICAL));
+        CallAfter([=]()
+        {
+            Scroll(wxDefaultCoord, scroll_pos);
+            ExposeArea(0, 0, m_width, m_height);
+            Dirty();
+        });
+    }
+}
+
 /*
 **  GTerm stuff
 */
@@ -1288,6 +1021,26 @@ void wxTerm::DrawText(int fg_color, int bg_color, int flags, int x, int y, int l
                       unsigned char *string)
 {
     int t;
+    int xpix = x * m_charWidth;
+    int ypix = y * m_charHeight;
+
+    // if (m_autoscroll)
+    // {
+    //     int yppu, cx, cy, vx, vy, sy;
+    //     GetScrollPixelsPerUnit(nullptr, &yppu);
+    //     GetClientSize( &cx, &cy);
+    //     GetViewStart(&vx, &vy);
+    //
+    //     int view_start_px = vy * yppu;
+    //     int view_end_px = view_start_px + cy;
+    //     if (ypix > view_end_px)
+    //         Scroll(GetScrollPos(wxHORIZONTAL), std::min((ypix+m_charHeight)/yppu, GetScrollLines(wxVERTICAL)));
+    //     CallAfter([=]()
+    //     {
+    //         ExposeArea(0, 0, m_width, m_height);
+    //         Dirty();
+    //     });
+    // }
 
     if (flags & BOLD && m_boldStyle == BS_COLOR)
         fg_color = (fg_color % 8) + 8;
@@ -1341,9 +1094,6 @@ void wxTerm::DrawText(int fg_color, int bg_color, int flags, int x, int y, int l
         }
     }
 
-    int xpix = x * m_charWidth;
-    int ypix = y * m_charHeight;
-
     m_curDC->SetBackgroundMode(wxSOLID);
     m_curDC->SetTextBackground(m_colors[bg_color]);
     m_curDC->SetTextForeground(m_colors[fg_color]);
@@ -1372,7 +1122,6 @@ void wxTerm::DrawText(int fg_color, int bg_color, int flags, int x, int y, int l
 //////////////////////////////////////////////////////////////////////////////
 void wxTerm::DoDrawCursor(int fg_color, int bg_color, int flags, int x, int y, unsigned char c)
 {
-
     if (flags & BOLD && m_boldStyle == BS_COLOR)
         fg_color = (fg_color % 8) + 8;
 
@@ -1425,6 +1174,11 @@ void wxTerm::DoDrawCursor(int fg_color, int bg_color, int flags, int x, int y, u
     m_curDC->DrawText(str, x, y);
     if (flags & BOLD && m_boldStyle == BS_OVERSTRIKE)
         m_curDC->DrawText(str, x + 1, y);
+
+    if (m_autoscroll)
+    {
+        ScrollToBottom();
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1451,14 +1205,7 @@ void wxTerm::DrawCursor(int fg_color, int bg_color, int flags, int x, int y, uns
     m_curBG = bg_color, m_curFlags = flags;
     m_curChar = c;
 
-    // if (m_timer.IsRunning())
-    //     m_timer.Stop();
     DoDrawCursor(fg_color, bg_color, flags, x, y, c);
-    //    if (m_curBlinkRate)
-    //    {
-    //        m_timer.Start(TIMER_TIMEOUT);
-    //        m_curState = 1;
-    //    }
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1923,3 +1670,311 @@ bool wxTerm::CharPositionFromPoint(int x, int y, int &column, int &lineNumber)
     */
     return false;
 }
+
+/*
+**  Keycode translation tables
+*/
+wxTerm::TermKeyMap wxTerm::keyMapTable[] = {{WXK_BACK, GTerm::KEY_BACK},
+                                            {WXK_TAB, GTerm::KEY_TAB},
+                                            {WXK_RETURN, GTerm::KEY_RETURN},
+                                            {WXK_ESCAPE, GTerm::KEY_ESCAPE},
+                                            {WXK_SPACE, GTerm::KEY_SPACE},
+                                            {WXK_LEFT, GTerm::KEY_LEFT},
+                                            {WXK_UP, GTerm::KEY_UP},
+                                            {WXK_RIGHT, GTerm::KEY_RIGHT},
+                                            {WXK_DOWN, GTerm::KEY_DOWN},
+                                            //  { WXK_DIVIDE, GTerm::KEY_DIVIDE },
+                                            //  { WXK_MULTIPLY, GTerm::KEY_MULTIPLY },
+                                            //  { WXK_SUBTRACT, GTerm::KEY_SUBTRACT },
+                                            //  { WXK_ADD, GTerm::KEY_ADD },
+                                            {WXK_HOME, GTerm::KEY_HOME},
+                                            {WXK_END, GTerm::KEY_END},
+                                            {WXK_PAGEUP, GTerm::KEY_PAGEUP},
+                                            {WXK_PAGEDOWN, GTerm::KEY_PAGEDOWN},
+                                            {WXK_INSERT, GTerm::KEY_INSERT},
+                                            {WXK_DELETE, GTerm::KEY_DELETE},
+                                            //  { WXK_NEXT, GTerm::KEY_NEXT },
+                                            //  { WXK_PRIOR, GTerm::KEY_PRIOR },
+                                            //  { WXK_NUMPAD0, GTerm::KEY_NUMPAD0 },
+                                            //  { WXK_NUMPAD1, GTerm::KEY_NUMPAD1 },
+                                            //  { WXK_NUMPAD2, GTerm::KEY_NUMPAD2 },
+                                            //  { WXK_NUMPAD3, GTerm::KEY_NUMPAD3 },
+                                            //  { WXK_NUMPAD4, GTerm::KEY_NUMPAD4 },
+                                            //  { WXK_NUMPAD5, GTerm::KEY_NUMPAD5 },
+                                            //  { WXK_NUMPAD6, GTerm::KEY_NUMPAD6 },
+                                            //  { WXK_NUMPAD7, GTerm::KEY_NUMPAD7 },
+                                            //  { WXK_NUMPAD8, GTerm::KEY_NUMPAD8 },
+                                            //  { WXK_NUMPAD9, GTerm::KEY_NUMPAD9 },
+                                            //  { WXK_DECIMAL, GTerm::KEY_NUMPAD_DECIMAL },
+                                            {WXK_F1, GTerm::KEY_F1},
+                                            {WXK_F2, GTerm::KEY_F2},
+                                            {WXK_F3, GTerm::KEY_F3},
+                                            {WXK_F4, GTerm::KEY_F4},
+                                            {WXK_F5, GTerm::KEY_F5},
+                                            {WXK_F6, GTerm::KEY_F6},
+                                            {WXK_F7, GTerm::KEY_F7},
+                                            {WXK_F8, GTerm::KEY_F8},
+                                            {WXK_F9, GTerm::KEY_F9},
+                                            {WXK_F10, GTerm::KEY_F10},
+                                            {WXK_F11, GTerm::KEY_F11},
+                                            {WXK_F12, GTerm::KEY_F12},
+                                            {(wxKeyCode)0, GTerm::KEY_NULL}};
+
+static unsigned char wxTerm::xCharMap[] = {
+    0, // 0
+    1, // 1
+    2, // 2
+    3, // 3
+    1, // 4
+    5, // 5
+    6, // 6
+    7, // 7
+    8, // 8
+    9, // 9
+    10, // 10
+    11, // 11
+    12, // 12
+    13, // 13
+    14, // 14
+    15, // 15
+    62, // 16
+    60, // 17
+    18, // 18
+    19, // 19
+    20, // 20
+    21, // 21
+    22, // 22
+    23, // 23
+    24, // 24
+    25, // 25
+    26, // 26
+    27, // 27
+    28, // 28
+    29, // 29
+    94, // 30
+    31, // 31
+    32, // 32
+    33, // 33
+    34, // 34
+    35, // 35
+    36, // 36
+    37, // 37
+    38, // 38
+    39, // 39
+    40, // 40
+    41, // 41
+    42, // 42
+    43, // 43
+    44, // 44
+    45, // 45
+    46, // 46
+    47, // 47
+    48, // 48
+    49, // 49
+    50, // 50
+    51, // 51
+    52, // 52
+    53, // 53
+    54, // 54
+    55, // 55
+    56, // 56
+    57, // 57
+    58, // 58
+    59, // 59
+    60, // 60
+    61, // 61
+    62, // 62
+    63, // 63
+    64, // 64
+    65, // 65
+    66, // 66
+    67, // 67
+    68, // 68
+    69, // 69
+    70, // 70
+    71, // 71
+    72, // 72
+    73, // 73
+    74, // 74
+    75, // 75
+    76, // 76
+    77, // 77
+    78, // 78
+    79, // 79
+    80, // 80
+    81, // 81
+    82, // 82
+    83, // 83
+    84, // 84
+    85, // 85
+    86, // 86
+    87, // 87
+    88, // 88
+    89, // 89
+    90, // 90
+    91, // 91
+    92, // 92
+    93, // 93
+    94, // 94
+    95, // 95
+    96, // 96
+    97, // 97
+    98, // 98
+    99, // 99
+    100, // 100
+    101, // 101
+    102, // 102
+    103, // 103
+    104, // 104
+    105, // 105
+    106, // 106
+    107, // 107
+    108, // 108
+    109, // 109
+    110, // 110
+    111, // 111
+    112, // 112
+    113, // 113
+    114, // 114
+    115, // 115
+    116, // 116
+    117, // 117
+    118, // 118
+    119, // 119
+    120, // 120
+    121, // 121
+    122, // 122
+    123, // 123
+    124, // 124
+    125, // 125
+    126, // 126
+    127, // 127
+    128, // 128
+    129, // 129
+    130, // 130
+    131, // 131
+    132, // 132
+    133, // 133
+    134, // 134
+    135, // 135
+    136, // 136
+    137, // 137
+    138, // 138
+    139, // 139
+    140, // 140
+    141, // 141
+    142, // 142
+    143, // 143
+    144, // 144
+    145, // 145
+    146, // 146
+    147, // 147
+    148, // 148
+    149, // 149
+    150, // 150
+    151, // 151
+    152, // 152
+    153, // 153
+    154, // 154
+    155, // 155
+    156, // 156
+    157, // 157
+    158, // 158
+    159, // 159
+    160, // 160
+    161, // 161
+    162, // 162
+    163, // 163
+    164, // 164
+    165, // 165
+    166, // 166
+    167, // 167
+    168, // 168
+    169, // 169
+    170, // 170
+    171, // 171
+    172, // 172
+    173, // 173
+    174, // 174
+    175, // 175
+    2, // 176
+    2, // 177
+    2, // 178
+    25, // 179
+    22, // 180
+    22, // 181
+    22, // 182
+    12, // 183
+    12, // 184
+    22, // 185
+    25, // 186
+    12, // 187
+    11, // 188
+    11, // 189
+    11, // 190
+    12, // 191
+    14, // 192
+    23, // 193
+    24, // 194
+    21, // 195
+    18, // 196
+    15, // 197
+    21, // 198
+    21, // 199
+    14, // 200
+    13, // 201
+    23, // 202
+    24, // 203
+    21, // 204
+    18, // 205
+    15, // 206
+    23, // 207
+    23, // 208
+    24, // 209
+    24, // 210
+    14, // 211
+    14, // 212
+    13, // 213
+    13, // 214
+    15, // 215
+    15, // 216
+    11, // 217
+    13, // 218
+    0, // 219
+    220, // 220
+    221, // 221
+    222, // 222
+    223, // 223
+    224, // 224
+    225, // 225
+    226, // 226
+    227, // 227
+    228, // 228
+    229, // 229
+    230, // 230
+    231, // 231
+    232, // 232
+    233, // 233
+    234, // 234
+    235, // 235
+    236, // 236
+    237, // 237
+    238, // 238
+    239, // 239
+    240, // 240
+    241, // 241
+    242, // 242
+    243, // 243
+    244, // 244
+    245, // 245
+    246, // 246
+    247, // 247
+    248, // 248
+    249, // 249
+    250, // 250
+    251, // 251
+    252, // 252
+    253, // 253
+    254, // 254
+    255 // 255
+};
