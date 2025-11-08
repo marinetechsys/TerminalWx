@@ -264,8 +264,8 @@ void GTerm::cursor_position()
 
 void GTerm::device_attrib()
 {
-	char *str = "\033[?1;2c";
-        ProcessOutput(strlen(str), (unsigned char *)str);
+	const char *str = "\033[?1;2c";
+        ProcessOutput(strlen(str), (const char *)str);
 }
 
 void GTerm::delete_char()
@@ -319,7 +319,7 @@ void GTerm::request_param()
 {
 	char str[40];
 	sprintf(str, "\033[%d;1;1;120;120;1;0x", param[0]+2);
-	ProcessOutput(strlen(str), (unsigned char *)str);
+	ProcessOutput(strlen(str), (const char *)str);
 }
 
 void GTerm::set_margins()
@@ -353,13 +353,13 @@ void GTerm::delete_line()
 
 void GTerm::status_report()
 {
-	char str[20];
+	char str[28];
 	if (param[0] == 5) {
 		char *str = "\033[0n";
-                ProcessOutput(strlen(str), (unsigned char *)str);
+                ProcessOutput(strlen(str), (const char *)str);
 	} else if (param[0] == 6) {
 		sprintf(str, "\033[%d;%dR", cursor_y+1, cursor_x+1);
-		ProcessOutput(strlen(str), (unsigned char *)str);
+		ProcessOutput(strlen(str), (const char *)str);
 	}
 }
 
@@ -512,7 +512,7 @@ void GTerm::vt52_cursorx()
 void GTerm::vt52_ident()
 {
 	char *str = "\033/Z";
-        ProcessOutput(strlen(str), (unsigned char *)str);
+        ProcessOutput(strlen(str), (const char *)str);
 }
 
 
@@ -523,7 +523,7 @@ void GTerm::pc_begin(void)
 //printf("pc_begin...\n");
   set_mode_flag(PC);
 //printf("pc_begin: mode_flags = %x\n", mode_flags);
-  ProcessOutput((unsigned int)strlen(pc_machinename) + 1, (unsigned char *)pc_machinename);
+  ProcessOutput((unsigned int)strlen(pc_machinename) + 1, (const char *)pc_machinename);
   pc_oldWidth = Width();
   pc_oldHeight = Height();
   ResizeTerminal(80, 25);

@@ -18,7 +18,7 @@ License: wxWindows License Version 3.1 (See the file license3.txt)
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <stdint.h>
 
 #define MAXWIDTH 400
 #define MAXHEIGHT 600
@@ -64,7 +64,7 @@ private:
     unsigned char *text;
     unsigned short *color;
     short linenumbers[MAXHEIGHT]; // text at text[linenumbers[y]*MAXWIDTH]
-    unsigned char dirty_startx[MAXHEIGHT], dirty_endx[MAXHEIGHT];
+    uint16_t dirty_startx[MAXHEIGHT], dirty_endx[MAXHEIGHT];
     int pending_scroll; // >0 means scroll up
     int doing_update;
 
@@ -154,7 +154,7 @@ private:
     {
         int keyCode;
 
-        char *seq;
+        const char *seq;
     } VTKeySeq;
 
     static VTKeySeq cursor_keys[];
@@ -300,7 +300,7 @@ public:
 
     // function to control terminal
     virtual void ProcessInput(int len, unsigned char *data);
-    virtual void ProcessOutput(int len, unsigned char *data) { SendBack(len, (char *)data); }
+    virtual void ProcessOutput(int len, const char *data) { SendBack(len, data); }
     virtual void ResizeTerminal(int width, int height);
     int Width() { return width; }
     int Height() { return height; }
@@ -323,8 +323,8 @@ public:
     // optional child-supplied functions
     virtual void MoveChars(int sx, int sy, int dx, int dy, int w, int h) {}
     virtual void ClearChars(int clear_bg_color, int x, int y, int w, int h) {}
-    virtual void SendBack(int len, char *data) {}
-    virtual void SendBack(char *data) { SendBack(strlen(data), data); }
+    virtual void SendBack(int len, const char *data) {}
+    virtual void SendBack(const char *data) { SendBack(strlen(data), data); }
     virtual void ModeChange(int state) {}
     virtual void Bell() {}
     virtual void RequestSizeChange(int w, int h) {}

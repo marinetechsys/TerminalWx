@@ -55,8 +55,8 @@ public:
 protected:
 private:
   void OnTerminalInput(TerminalInputEvent&);
-  virtual void SendBack(int len, char* data);
-  virtual void SendBack(char* data);
+  virtual void SendBack(int len, const char* data);
+  virtual void SendBack(const char* data);
   DECLARE_EVENT_TABLE()
 };
 

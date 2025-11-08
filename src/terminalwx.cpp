@@ -36,8 +36,8 @@ void TerminalWx::OnUserInput(wxString input)
     // By default do nothing.
 }
 
-void TerminalWx::SendBack(int len, char *data) { OnUserInput(wxString(data, len)); }
-void TerminalWx::SendBack(char *data) { OnUserInput(wxString(data)); }
+void TerminalWx::SendBack(int len, const char *data) { OnUserInput(wxString(data, len)); }
+void TerminalWx::SendBack(const char *data) { OnUserInput(wxString(data)); }
 /**
  *  Processes characters sent from the backend.
  *
