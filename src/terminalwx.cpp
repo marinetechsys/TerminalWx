@@ -32,7 +32,7 @@ TerminalWx::TerminalWx(wxWindow *parent, wxWindowID id, const wxPoint &pos, int 
 */
 void TerminalWx::OnUserInput(wxString input)
 {
-    wxLogDebug("GotInput! %s", input);
+    //wxLogDebug("GotInput! %s", input);
     // By default do nothing.
 }
 
@@ -47,7 +47,7 @@ void TerminalWx::SendBack(const char *data) { OnUserInput(wxString(data)); }
 void TerminalWx::DisplayChars(const wxString &str)
 {
     ProcessInput(str.length(), (unsigned char *)const_cast<char *>((const char *)str.mb_str()));
-    std::cout << str;
+    //std::cout << str;
 }
 
 void TerminalWx::DisplayChars(int len, char *text)
