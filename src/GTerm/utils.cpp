@@ -275,13 +275,13 @@ void GTerm::move_cursor(int x, int y)
     cursor_y = y;
 }
 
-void GTerm::set_mode_flag(int flag)
+void GTerm::set_mode_flag(uint32_t flag)
 {
     mode_flags |= flag;
     ModeChange(mode_flags);
 }
 
-void GTerm::clear_mode_flag(int flag)
+void GTerm::clear_mode_flag(uint32_t flag)
 {
     mode_flags &= ~flag;
     ModeChange(mode_flags);

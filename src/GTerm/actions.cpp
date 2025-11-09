@@ -83,6 +83,8 @@ void GTerm::lf()
 	} else {
 		scroll_region(scroll_top, scroll_bot, 1);
 	}
+	if (mode_flags & NEWLINECR)
+		move_cursor(0, cursor_y);
 }
 
 void GTerm::ff()

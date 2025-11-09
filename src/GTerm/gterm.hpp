@@ -47,15 +47,16 @@ public:
         CURSORAPPMODE = 0x20,
         CURSORRELATIVE = 0x40,
         NEWLINE = 0x80,
-        INSERT = 0x100,
-        KEYAPPMODE = 0x200,
-        DEFERUPDATE = 0x400,
-        DESTRUCTBS = 0x800,
-        TEXTONLY = 0x1000,
-        LOCALECHO = 0x2000,
-        CURSORINVISIBLE = 0x4000,
-        PC = 0x8000,
-        SELECTED = 0x8000 // flag to indicate a char is selected
+        NEWLINECR = 0x100,
+        INSERT = 0x200,
+        KEYAPPMODE = 0x400,
+        DEFERUPDATE = 0x800,
+        DESTRUCTBS = 0x1000,
+        TEXTONLY = 0x2000,
+        LOCALECHO = 0x4000,
+        CURSORINVISIBLE = 0x8000,
+        PC = 0x10000,
+        SELECTED = 0x20000 // flag to indicate a char is selected
     } MODES;
 
 private:
@@ -309,10 +310,10 @@ public:
     virtual void Reset();
     virtual void Dirty() {};
 
-    int GetMode() { return mode_flags; }
-    void SetMode(int mode) { mode_flags = mode; }
-    void set_mode_flag(int flag);
-    void clear_mode_flag(int flag);
+    uint32_t GetMode() { return mode_flags; }
+    void SetMode(uint32_t mode) { mode_flags = mode; }
+    void set_mode_flag(uint32_t flag);
+    void clear_mode_flag(uint32_t flag);
 
     // manditory child-supplied functions
     virtual void DrawText(int fg_color, int bg_color, int flags, int x, int y, int len,
