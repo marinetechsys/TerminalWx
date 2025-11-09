@@ -300,7 +300,7 @@ public:
     virtual ~GTerm();
 
     // function to control terminal
-    virtual void ProcessInput(int len, unsigned char *data);
+    virtual void ProcessInput(int len, const char *data);
     virtual void ProcessOutput(int len, const char *data) { SendBack(len, data); }
     virtual void ResizeTerminal(int width, int height);
     int Width() { return width; }

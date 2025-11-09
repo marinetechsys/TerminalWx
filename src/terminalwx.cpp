@@ -46,13 +46,13 @@ void TerminalWx::SendBack(const char *data) { OnUserInput(wxString(data)); }
  */
 void TerminalWx::DisplayChars(const wxString &str)
 {
-    ProcessInput(str.length(), (unsigned char *)const_cast<char *>((const char *)str.mb_str()));
+    ProcessInput(str.length(), str.mb_str());
     //std::cout << str;
 }
 
-void TerminalWx::DisplayChars(int len, char *text)
+void TerminalWx::DisplayChars(int len, const char *text)
 {
-    ProcessInput(len, (unsigned char *)text);
+    ProcessInput(len, text);
 }
 
 /**
@@ -63,7 +63,7 @@ void TerminalWx::DisplayChars(int len, char *text)
  */
 void TerminalWx::DisplayCharsUnsafe(const wxString &str)
 {
-    ProcessInput(str.length(), (unsigned char *)const_cast<char *>((const char *)str.mb_str()));
+    ProcessInput(str.length(), str.mb_str());
 }
 
 void TerminalWx::OnTerminalInput(TerminalInputEvent &evt) { DisplayCharsUnsafe(evt.GetString()); }

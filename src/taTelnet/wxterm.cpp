@@ -1493,7 +1493,7 @@ void wxTerm::RequestSizeChange(int w, int h) { ResizeTerminal(w, h); }
 ///
 ///  @author Derry Bryson @date 04-22-2004
 //////////////////////////////////////////////////////////////////////////////
-void wxTerm::ProcessInput(int len, unsigned char *data)
+void wxTerm::ProcessInput(int len, const char *data)
 {
     // ClearSelection();
 

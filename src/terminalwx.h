@@ -49,7 +49,7 @@ public:
                    const wxString& name = "TerminalWx");
     virtual ~TerminalWx();
     virtual void OnUserInput(wxString);
-    virtual void DisplayChars(int len, char* text);
+    virtual void DisplayChars(int len, const char* text);
     virtual void DisplayChars(const wxString& text);
     virtual void DisplayCharsUnsafe(const wxString& text);
 protected:

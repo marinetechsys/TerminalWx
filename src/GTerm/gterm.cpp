@@ -17,7 +17,7 @@ License: wxWindows License Version 3.1 (See the file license3.txt)
 
 using namespace std;
 
-void GTerm::ProcessInput(int len, unsigned char *data)
+void GTerm::ProcessInput(int len, const char *data)
 {
     // printf("ProcessInput called...\n");
     int i;

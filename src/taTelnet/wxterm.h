@@ -138,7 +138,7 @@ public:
     virtual void ResizeTerminal(int w, int h);
     virtual void RequestSizeChange(int w, int h);
 
-    virtual void ProcessInput(int len, unsigned char *data);
+    virtual void ProcessInput(int len, const char *data);
     //  virtual void ProcessOutput(int len, unsigned char *data);
 
     virtual void SelectPrinter(char *PrinterName);
