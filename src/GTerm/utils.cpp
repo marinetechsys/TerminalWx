@@ -132,7 +132,7 @@ void GTerm::scroll_region(int start_y, int end_y, int num)
 {
     int y, takey, fast_scroll, mx, clr, x, yp, c;
     short temp[MAXHEIGHT];
-    unsigned char temp_sx[MAXHEIGHT], temp_ex[MAXHEIGHT];
+    uint16_t temp_sx[MAXHEIGHT], temp_ex[MAXHEIGHT];
 
     if (!num)
         return;
