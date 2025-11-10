@@ -651,7 +651,8 @@ void GTerm::pc_arg(void)
             yp = linenumbers[pc_args[1] + i] * MAXWIDTH;
             yp2 = linenumbers[pc_args[5] + i] * MAXWIDTH;
             memmove(&text[yp2 + pc_args[4]], &text[yp + pc_args[0]], pc_args[2]);
-            memmove(&color[yp2 + pc_args[4]], &color[yp + pc_args[0]], pc_args[2]);
+            memmove(&color[yp2 + pc_args[4]], &color[yp + pc_args[0]],
+                    pc_args[2] * sizeof(color[0]));
             changed_line(pc_args[5] + i, pc_args[4], pc_args[4] + pc_args[2] - 1);
           }
         }
@@ -662,7 +663,8 @@ void GTerm::pc_arg(void)
             yp = linenumbers[pc_args[1] + i] * MAXWIDTH;
             yp2 = linenumbers[pc_args[5] + i] * MAXWIDTH;
             memmove(&text[yp2 + pc_args[4]], &text[yp + pc_args[0]], pc_args[2]);
-            memmove(&color[yp2 + pc_args[4]], &color[yp + pc_args[0]], pc_args[2]);
+            memmove(&color[yp2 + pc_args[4]], &color[yp + pc_args[0]],
+                    pc_args[2] * sizeof(color[0]));
             changed_line(pc_args[5] + i, pc_args[4], pc_args[4] + pc_args[2] - 1);
           }
         }
