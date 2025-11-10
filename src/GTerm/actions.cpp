@@ -34,11 +34,11 @@ char str[100];
 
 	n = 0;
 	if (mode_flags & NOEOLWRAP) {
-		while (!IS_CTRL_CHAR(input_data[n]) && n<data_len) n++;
+		while (n < data_len && !IS_CTRL_CHAR(input_data[n])) n++;
 		n_taken = n;
 		if (cursor_x+n>=width) n = width-cursor_x;
 	} else {
-		while (!IS_CTRL_CHAR(input_data[n]) && n<data_len && cursor_x+n<width) n++;
+		while (n < data_len && cursor_x+n<width && !IS_CTRL_CHAR(input_data[n])) n++;
 		n_taken = n;
 	}
 
